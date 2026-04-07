@@ -86,8 +86,7 @@ func TestHealth(t *testing.T) {
 			t.Errorf("path = %s", r.URL.Path)
 		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"ok":       true,
-			"provider": "smtp",
+			"ok": true,
 			"stats": map[string]int64{
 				"total_sent": 10, "total_failed": 1,
 				"last_24h_sent": 2, "last_24h_failed": 0,
@@ -101,8 +100,8 @@ func TestHealth(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Health: %v", err)
 	}
-	if !resp.OK || resp.Provider != "smtp" {
-		t.Errorf("Health: ok=%v provider=%q", resp.OK, resp.Provider)
+	if !resp.OK {
+		t.Errorf("Health: ok=%v", resp.OK)
 	}
 	if resp.Stats == nil || resp.Stats.TotalSent != 10 {
 		t.Errorf("Health: stats = %+v", resp.Stats)
@@ -118,7 +117,7 @@ func TestLogs(t *testing.T) {
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"logs": []map[string]interface{}{
 				{
-					"id": "1", "sent_at": "2025-03-09T12:00:00Z", "provider": "smtp",
+					"id": "1", "sent_at": "2025-03-09T12:00:00Z", "merchant_name": "default",
 					"to": []string{"a@test.com"}, "subject": "S", "status": "sent",
 					"duration_ms": int64(100),
 				},

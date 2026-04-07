@@ -17,14 +17,14 @@ type LogsFilter struct {
 
 // LogEntry is one entry from GET /logs.
 type LogEntry struct {
-	ID         string    `json:"id"`
-	SentAt     time.Time `json:"sent_at"`
-	Provider   string    `json:"provider"`
-	To         []string  `json:"to"`
-	Subject    string    `json:"subject"`
-	Status     string    `json:"status"`
-	Error      string    `json:"error,omitempty"`
-	DurationMS int64     `json:"duration_ms"`
+	ID           string    `json:"id"`
+	SentAt       time.Time `json:"sent_at"`
+	MerchantName string    `json:"merchant_name"`
+	To           []string  `json:"to"`
+	Subject      string    `json:"subject"`
+	Status       string    `json:"status"`
+	Error        string    `json:"error,omitempty"`
+	DurationMS   int64     `json:"duration_ms"`
 }
 
 // LogsResponse is the response from GET /logs.

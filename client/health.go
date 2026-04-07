@@ -7,9 +7,8 @@ import (
 
 // HealthResponse is the response from GET /health.
 type HealthResponse struct {
-	OK       bool   `json:"ok"`
-	Provider string `json:"provider"`
-	Stats    *Stats `json:"stats,omitempty"`
+	OK    bool   `json:"ok"`
+	Stats *Stats `json:"stats,omitempty"`
 }
 
 // Stats holds aggregate send stats (optional in health response).
