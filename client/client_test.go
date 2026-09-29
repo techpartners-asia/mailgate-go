@@ -55,6 +55,32 @@ func TestSend_Success(t *testing.T) {
 	}
 }
 
+func TestSend_CategoryInBody(t *testing.T) {
+	var got struct {
+		Category string `json:"category"`
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		json.NewDecoder(r.Body).Decode(&got)
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+	}))
+	defer server.Close()
+
+	c := New(server.URL, "key")
+	if err := c.Send(context.Background(), SendRequest{
+		To:       []string{"a@test.com"},
+		Subject:  "Hi",
+		BodyText: "Hello",
+		Category: "ebarimt",
+	}); err != nil {
+		t.Fatalf("Send: %v", err)
+	}
+	// The server applies per-category caps off this field, so it must reach the wire.
+	if got.Category != "ebarimt" {
+		t.Errorf("category in request body = %q, want ebarimt", got.Category)
+	}
+}
+
 func TestSend_APIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)

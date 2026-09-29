@@ -17,6 +17,9 @@ type SendRequest struct {
 	BodyText    string       `json:"body_text,omitempty"`
 	BodyHTML    string       `json:"body_html,omitempty"`
 	Attachments []Attachment `json:"attachments,omitempty"`
+	// Category tags the message type (e.g. "ebarimt", "auth") so the server can
+	// apply per-category daily send caps. Optional; empty means uncategorized.
+	Category string `json:"category,omitempty"`
 }
 
 // Attachment is one attachment in a send request (data is base64-encoded in JSON).
@@ -40,6 +43,7 @@ type sendRequestJSON struct {
 	BodyText    string           `json:"body_text,omitempty"`
 	BodyHTML    string           `json:"body_html,omitempty"`
 	Attachments []sendAttachment `json:"attachments,omitempty"`
+	Category    string           `json:"category,omitempty"`
 }
 
 // Send sends an email via the mailgate API. At least one of BodyText or BodyHTML must be set.
@@ -54,6 +58,7 @@ func (c *Client) Send(ctx context.Context, req SendRequest) error {
 		Subject:  req.Subject,
 		BodyText: req.BodyText,
 		BodyHTML: req.BodyHTML,
+		Category: req.Category,
 	}
 	for _, a := range req.Attachments {
 		payload.Attachments = append(payload.Attachments, sendAttachment{
