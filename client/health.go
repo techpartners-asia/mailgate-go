@@ -5,21 +5,15 @@ import (
 	"net/http"
 )
 
-// HealthResponse is the response from GET /health.
+// HealthResponse is the response from GET /health. The endpoint reports
+// liveness only; the aggregate-stats body was removed server-side (per-merchant
+// stats now live behind the admin API).
 type HealthResponse struct {
-	OK    bool   `json:"ok"`
-	Stats *Stats `json:"stats,omitempty"`
+	OK   bool   `json:"ok"`
+	Code string `json:"code,omitempty"`
 }
 
-// Stats holds aggregate send stats (optional in health response).
-type Stats struct {
-	TotalSent     int64 `json:"total_sent"`
-	TotalFailed   int64 `json:"total_failed"`
-	Last24hSent   int64 `json:"last_24h_sent"`
-	Last24hFailed int64 `json:"last_24h_failed"`
-}
-
-// Health calls GET /health (no API key required). Returns server liveness and optional stats.
+// Health calls GET /health (no API key required). Returns server liveness.
 func (c *Client) Health(ctx context.Context) (HealthResponse, error) {
 	resp, err := c.do(ctx, http.MethodGet, "/health", nil, false)
 	if err != nil {
