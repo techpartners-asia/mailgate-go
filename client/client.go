@@ -59,10 +59,11 @@ func decodeJSON(resp *http.Response, v interface{}) error {
 	if resp.StatusCode >= 400 {
 		var errBody struct {
 			OK    bool   `json:"ok"`
+			Code  string `json:"code"`
 			Error string `json:"error"`
 		}
 		_ = json.NewDecoder(resp.Body).Decode(&errBody)
-		return &APIError{StatusCode: resp.StatusCode, Message: errBody.Error}
+		return &APIError{StatusCode: resp.StatusCode, Code: errBody.Code, Message: errBody.Error}
 	}
 	return json.NewDecoder(resp.Body).Decode(v)
 }
@@ -70,7 +71,11 @@ func decodeJSON(resp *http.Response, v interface{}) error {
 // APIError is returned when the server responds with 4xx or 5xx.
 type APIError struct {
 	StatusCode int
-	Message    string
+	// Code is the server's self-describing failure code (e.g. "DAILY_CAP_REACHED",
+	// "RATE_LIMITED", "VALIDATION_ERROR"), letting callers distinguish failures
+	// that share an HTTP status. Empty if the server sent none.
+	Code    string
+	Message string
 }
 
 func (e *APIError) Error() string {

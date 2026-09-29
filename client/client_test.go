@@ -58,7 +58,7 @@ func TestSend_Success(t *testing.T) {
 func TestSend_APIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]interface{}{"ok": false, "error": "invalid email"})
+		json.NewEncoder(w).Encode(map[string]interface{}{"ok": false, "code": "VALIDATION_ERROR", "error": "invalid email"})
 	}))
 	defer server.Close()
 
@@ -78,6 +78,12 @@ func TestSend_APIError(t *testing.T) {
 	if apiErr.StatusCode != 400 || apiErr.Message != "invalid email" {
 		t.Errorf("APIError: %d %q", apiErr.StatusCode, apiErr.Message)
 	}
+	// The server's self-describing code must reach the caller so failures that
+	// share an HTTP status (e.g. 429 DAILY_CAP_REACHED vs RATE_LIMITED) are
+	// distinguishable without string-matching the message.
+	if apiErr.Code != "VALIDATION_ERROR" {
+		t.Errorf("APIError.Code = %q, want VALIDATION_ERROR", apiErr.Code)
+	}
 }
 
 func TestHealth(t *testing.T) {
@@ -86,11 +92,8 @@ func TestHealth(t *testing.T) {
 			t.Errorf("path = %s", r.URL.Path)
 		}
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"ok": true,
-			"stats": map[string]int64{
-				"total_sent": 10, "total_failed": 1,
-				"last_24h_sent": 2, "last_24h_failed": 0,
-			},
+			"ok":   true,
+			"code": "OK",
 		})
 	}))
 	defer server.Close()
@@ -103,8 +106,8 @@ func TestHealth(t *testing.T) {
 	if !resp.OK {
 		t.Errorf("Health: ok=%v", resp.OK)
 	}
-	if resp.Stats == nil || resp.Stats.TotalSent != 10 {
-		t.Errorf("Health: stats = %+v", resp.Stats)
+	if resp.Code != "OK" {
+		t.Errorf("Health: code = %q, want OK", resp.Code)
 	}
 }
 
