@@ -38,6 +38,10 @@ err = c.Send(ctx, client.SendRequest{
 // List send logs (scoped to authenticated merchant)
 logs, count, err := c.Logs(ctx, client.LogsFilter{Status: "sent", Limit: 20, Offset: 0})
 
+// Today's sent/failed counts per category (UTC+8 day), plus daily and per-category caps
+stats, err := c.Stats(ctx)
+// stats.Sent, stats.Failed, stats.DailyCap, stats.Categories[i].{Category,Sent,Failed,Cap}
+
 // Health check (no API key required)
 health, err := c.Health(ctx)
 ```
